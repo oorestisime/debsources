@@ -21,7 +21,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 from debsources.consts import VCS_TYPES, SLOCCOUNT_LANGUAGES, \
-    CTAGS_LANGUAGES, METRIC_TYPES, COPYRIGHT_ORACLES
+    CTAGS_LANGUAGES, METRIC_TYPES, COPYRIGHT_ORACLES, CLOC_LANGUAGES
 
 Base = declarative_base()
 
@@ -407,3 +407,20 @@ class HistoryCopyright(Base):
     def __init__(self, suite, timestamp):
         self.suite = suite
         self.timestamp = timestamp
+
+
+class Cloccounts(Base):
+    __tablename__ = 'cloccounts'
+    __table_args__ = (UniqueConstraint('file_id', 'language'),
+                      PrimaryKeyConstraint('file_id', 'package_id'))
+
+    file_id = Column(BIGINT,
+                     ForeignKey('files.id', ondelete="CASCADE"),
+                     index=True, nullable=False)
+    package_id = Column(BIGINT,
+                        ForeignKey('packages.id', ondelete="CASCADE"),
+                        index=True, nullable=False)
+    code_count = Column(Integer)
+    comment_count = Column(Integer)
+    blank_count = Column(Integer)
+    language = Column(Enum(*CLOC_LANGUAGES, name='language'))
