@@ -5,7 +5,7 @@ MAINTAINER Matthieu Caneill <matthieu.caneill@gmail.com>
 ENV DEBIAN_FRONTEND noninteractive
 
 # PACKAGES
-RUN apt-get update && apt-get upgrade -y
+RUN apt-get update && apt-get upgrade -y --fix-missing
 RUN apt-get install -y supervisor
 RUN apt-get install -y \
     apache2 \
@@ -32,7 +32,15 @@ RUN apt-get install -y \
     diffstat
 
 # dev tools
-RUN apt-get install -y lynx emacs
+RUN apt-get install -y lynx emacs wget
+
+# setup cloc
+
+RUN mkdir /home/cloc && \
+    wget https://raw.githubusercontent.com/AlDanial/cloc/master/cloc -P /home/cloc && \
+    chmod +x /home/cloc/cloc
+
+ENV PATH /home/cloc:$PATH
 
 # SETUP
 
@@ -66,7 +74,6 @@ ADD etc /etc
 RUN rm /etc/apache2/sites-enabled/000-default.conf
 
 EXPOSE 80
-
 
 # docker run -i -p=5001:5000 -v=/home/matthieu/work/debian/debsources/testdata/mirror:/opt/testdata/mirror -t debsources bash
 
